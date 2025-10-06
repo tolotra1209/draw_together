@@ -91,7 +91,38 @@ def flood_fill(surface,x,y,target_color,replacement_color):
             continue 
         surface.set_at((nx,ny),replacement_color) 
         pile.extend([(nx+1,ny),(nx-1,ny),(nx,ny+1),(nx,ny-1)]) 
-        
+
+# --- Animation de transition (GIF) ---
+def jouer_transition():
+    transition = pygame.image.load("transition.gif")
+    clock = pygame.time.Clock()
+
+    try:
+        # Récupère toutes les frames du GIF
+        frames = []
+        frame_durations = []
+        frame_count = transition.get_num_frames()
+        for i in range(frame_count):
+            transition.seek(i)
+            frame = transition.copy()
+            frame = pygame.transform.scale(frame, (LARGEUR, HAUTEUR))
+            frames.append(frame)
+            # Durée d'affichage de chaque frame (par défaut ~33 ms si non défini)
+            frame_durations.append(getattr(transition.info, "duration", 33))
+    except:
+        # fallback si pygame ne gère qu'une frame
+        frames = [pygame.transform.scale(transition, (LARGEUR, HAUTEUR))]
+        frame_durations = [2000]
+
+    # Joue toutes les frames
+    for i, frame in enumerate(frames):
+        fenetre.blit(frame, (0, 0))
+        pygame.display.flip()
+        clock.tick(30)  # 30 FPS environ
+
+    # Petite pause de sécurité
+    pygame.time.wait(200)
+
 # --- Menu principal --- 
 def menu(): 
     global canvas 
@@ -124,6 +155,7 @@ def menu():
                 if bouton_jouer.collidepoint(x,y): 
                     canvas.fill(BLANC)  
                     in_menu = False 
+                    jouer_transition()
                     afficher_carte()
                 elif bouton_quitter.collidepoint(x,y): 
                     pygame.quit() 
@@ -141,22 +173,17 @@ def afficher_carte():
     # Positions approximatives des ronds (à ajuster ensuite)
     niveaux = [
         {"pos": (231, 550), "actif": True},   # Niveau 1 actif
-        {"pos": (671, 432), "actif": False},  # Exemple niveau 2 inactif
-        {"pos": (292, 314), "actif": False},  # Exemple niveau 3 inactif
-        {"pos": (739, 200), "actif": False},  # Exemple niveau 4 inactif
-        {"pos": (456, 204), "actif": False},  # Exemple niveau 5 inactif
+        {"pos": (671, 432), "actif": False},  # Niveau 2 inactif
+        {"pos": (292, 314), "actif": False},  # Niveau 3 inactif
+        {"pos": (739, 200), "actif": False},  # Niveau 4 inactif
+        {"pos": (456, 204), "actif": False},  # Niveau 5 inactif
     ]
 
     en_carte = True
     pygame.mouse.set_visible(True)
     while en_carte:
         fenetre.blit(carte, (0, 0))
-        # --- Affiche la position de la souris ---
-        x, y = pygame.mouse.get_pos()
-        texte_pos = font.render(f"({x}, {y})", True, NOIR)
-        fenetre.blit(texte_pos, (LARGEUR - 120, 20))
-
-
+        
         # Bouton retour
         pygame.draw.rect(fenetre, BLANC, bouton_retour)
         pygame.draw.rect(fenetre, NOIR, bouton_retour, 2)
