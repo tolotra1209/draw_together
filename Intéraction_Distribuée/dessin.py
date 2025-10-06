@@ -191,7 +191,7 @@ def afficher_carte():
 
         # Dessin des ronds des niveaux
         for i, niv in enumerate(niveaux):
-            couleur = (0, 255, 0) if niv["actif"] else (150, 150, 150)
+            couleur = (254, 170, 51) if niv["actif"] else (150, 150, 150)
             pygame.draw.circle(fenetre, couleur, niv["pos"], 15)
             pygame.draw.circle(fenetre, NOIR, niv["pos"], 2)
 
