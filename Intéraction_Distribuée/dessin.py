@@ -190,14 +190,14 @@ def lancer_dessin_par_calques(personnage):
     layers = calques.get(personnage, []) 
     current_layer = 0 
 
-    bouton_suivant = pygame.Rect(LARGEUR-140, HAUTEUR-60, 120, 40) # bas à droite 
-    
-    # Affiche le premier calque en opacité 40% 
+    bouton_suivant = pygame.Rect(LARGEUR-140, HAUTEUR-60, 120, 40) 
+
+    # --- Calque-guide (non dessinable) --- 
+    current_guide = None
     if layers: 
-        img = pygame.image.load(layers[current_layer]).convert_alpha() 
-        img = pygame.transform.scale(img, (canvas.get_width(), canvas.get_height())) 
-        img.set_alpha(102) 
-        canvas.blit(img, (0,0)) 
+        current_guide = pygame.image.load(layers[current_layer]).convert_alpha() 
+        current_guide = pygame.transform.scale(current_guide, (canvas.get_width(), canvas.get_height())) 
+        current_guide.set_alpha(102) 
         
         running = True 
         while running: 
@@ -216,28 +216,22 @@ def lancer_dessin_par_calques(personnage):
                             canvas.blit(redo_stack.pop(), (0,0)) 
                 elif event.type==pygame.MOUSEBUTTONDOWN: 
                     x,y = event.pos 
-                    
-                    # --- Bandeau fonctionnel --- 
                     clique_interface = False 
                     if y < HAUTEUR_BANDEAU: 
-                        # Palette 
                         for rect,c in palette_rects: 
                             if rect.collidepoint(x,y): 
                                 couleur_actuelle = c 
                                 outil = "crayon" 
                                 clique_interface = True 
-                        # Outils 
                         for rect,nom in outils_rects: 
                             if rect.collidepoint(x,y): 
                                 outil = nom 
                                 clique_interface = True 
-                        # Slider 
                         if slider_rect.collidepoint(x,y): 
                             slider_handle.x = max(slider_rect.left,min(slider_rect.right-10,x)) 
                             rayon = int((slider_handle.x - slider_rect.left)/2)+1 
                             slider_drag = True 
                             clique_interface = True 
-                        # Bouton Menu/Home 
                         if bouton_menu.collidepoint(x,y): 
                             canvas.fill(BLANC) 
                             menu() 
@@ -246,14 +240,14 @@ def lancer_dessin_par_calques(personnage):
                     if not dessin_finished and bouton_suivant.collidepoint(x,y): 
                         if current_layer < len(layers)-1: 
                             current_layer +=1 
-                            img = pygame.image.load(layers[current_layer]).convert_alpha() 
-                            img = pygame.transform.scale(img, (canvas.get_width(), canvas.get_height())) 
-                            img.set_alpha(102) 
-                            canvas.blit(img, (0,0)) 
+                            current_guide = pygame.image.load(layers[current_layer]).convert_alpha() 
+                            current_guide = pygame.transform.scale(current_guide, (canvas.get_width(), canvas.get_height())) 
+                            current_guide.set_alpha(102) 
                         else: 
                             dessin_finished = True 
-                    # --- Dessin --- 
-                    if not clique_interface and not dessin_finished and y >= HAUTEUR_BANDEAU: 
+                    # --- Dessin (si pas sur interface ni sur le bouton suivant) --- 
+                    if (not clique_interface and not dessin_finished and 
+                        y >= HAUTEUR_BANDEAU and not bouton_suivant.collidepoint(x,y)): 
                         save_state() 
                         dessin = True 
                         if outil=="crayon": 
@@ -269,7 +263,7 @@ def lancer_dessin_par_calques(personnage):
                     slider_drag=False 
                 elif event.type==pygame.MOUSEMOTION: 
                     x,y = event.pos 
-                    if dessin and not dessin_finished and y>=HAUTEUR_BANDEAU: 
+                    if dessin and not dessin_finished and y>=HAUTEUR_BANDEAU and not bouton_suivant.collidepoint(x,y): 
                         if outil=="crayon": 
                             pygame.draw.circle(canvas, couleur_actuelle, (x,y-HAUTEUR_BANDEAU),rayon) 
                         elif outil=="gomme": 
@@ -281,38 +275,35 @@ def lancer_dessin_par_calques(personnage):
             # --- AFFICHAGE --- 
             fenetre.fill(GRIS) 
             fenetre.blit(canvas,(0,HAUTEUR_BANDEAU)) 
+            # superposition du guide 
+            if current_guide and not dessin_finished: 
+                fenetre.blit(current_guide,(0,HAUTEUR_BANDEAU)) 
+            
             pygame.draw.rect(fenetre,(180,180,180),(0,0,LARGEUR,HAUTEUR_BANDEAU)) 
             
             # Palette 
             for rect,c in palette_rects: 
                 pygame.draw.rect(fenetre,c,rect) 
                 pygame.draw.rect(fenetre,VERT if c==couleur_actuelle else NOIR,rect,3 if c==couleur_actuelle else 2) 
-                
             # Outils 
             for rect,nom in outils_rects: 
                 pygame.draw.rect(fenetre,BLANC,rect) 
                 fenetre.blit(icones[nom],(rect.x+5,rect.y+5)) 
                 pygame.draw.rect(fenetre,VERT if nom==outil else NOIR, rect,3 if nom==outil else 2) 
-                
             # Slider 
             pygame.draw.rect(fenetre,(150,150,150),slider_rect) 
             pygame.draw.rect(fenetre,(0,0,0),slider_handle) 
             fenetre.blit(font.render(f"Taille: {rayon}",True,NOIR),(170,55)) 
-            
-            # Bouton Home/Menu 
+            # Menu 
             pygame.draw.rect(fenetre, BLANC, bouton_menu) 
             fenetre.blit(icone_home, (bouton_menu.x+10, bouton_menu.y+10)) 
             pygame.draw.rect(fenetre, NOIR, bouton_menu, 2) 
-            
-            # Bouton Suivant / Terminer 
+            # Suivant / Terminer 
             if not dessin_finished: 
                 pygame.draw.rect(fenetre, VERT, bouton_suivant) 
-                texte_btn = font.render(
-                    "Suivant" if current_layer < len(layers)-1 else "Terminer", True, NOIR
-                ) 
+                texte_btn = font.render("Suivant" if current_layer < len(layers)-1 else "Terminer", True, NOIR) 
                 fenetre.blit(texte_btn, (bouton_suivant.x+10, bouton_suivant.y+5)) 
-                
-            # Curseur personnalisé 
+            # Curseur 
             x,y = pygame.mouse.get_pos() 
             taille_curseur = rayon if y >= HAUTEUR_BANDEAU else 6 
             if outil=="crayon": 
@@ -321,7 +312,6 @@ def lancer_dessin_par_calques(personnage):
                 pygame.draw.circle(fenetre, NOIR, (x, y), taille_curseur, 1) 
             elif outil=="pot": 
                 fenetre.blit(curseurs["pot"], (x-12, y-12)) 
-
             pygame.display.flip() 
         
 # --- Lancement --- 
