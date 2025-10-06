@@ -220,8 +220,9 @@ def afficher_carte():
 
 # --- Sélection du dessin --- 
 def selection_dessin(): 
-    images = ["datta.png", "eby.png", "unko.png"] 
-    noms = ["Datta", "Eby", "Unko"] 
+    images = ["unko.png", "eby.png", "datta.png"]
+    noms = ["Unko", "Eby", "Datta"]
+
     rects = [] 
     decal_x = 100 
     y_pos = 200 
@@ -238,13 +239,19 @@ def selection_dessin():
     while selection: 
         fenetre.blit(fond_choice, (0,0)) 
         
-        titre = font.render("Quel personnage dessiner ?", True, NOIR) 
-        fenetre.blit(titre, ((LARGEUR - titre.get_width())//2, 50)) 
+        # --- Encadrer le titre ---
+        titre = font.render("Quel personnage dessiner ?", True, NOIR)
+        titre_rect = pygame.Rect((LARGEUR - titre.get_width())//2 - 20, 40, titre.get_width() + 40, titre.get_height() + 20)
+        pygame.draw.rect(fenetre, BLANC, titre_rect)
+        pygame.draw.rect(fenetre, MARRON_FONCE, titre_rect, 3)
+        fenetre.blit(titre, (titre_rect.x + 20, titre_rect.y + 10))
         
+        # --- Images et noms ---
         for i, rect in enumerate(rects): 
             pygame.draw.rect(fenetre, BLANC, rect) 
             pygame.draw.rect(fenetre, MARRON_FONCE, rect, 3) 
             fenetre.blit(images_surfaces[i], (rect.x, rect.y)) 
+            
             texte = font.render(noms[i], True, MARRON_FONCE) 
             texte_rect = pygame.Rect(rect.x, rect.y + hauteur_img + 5, largeur_img, texte.get_height() + 4) 
             pygame.draw.rect(fenetre, BLANC, texte_rect) 
