@@ -385,10 +385,13 @@ def lancer_dessin_par_calques(personnage):
             fenetre.blit(icone_home, (bouton_menu.x+10, bouton_menu.y+10)) 
             pygame.draw.rect(fenetre, NOIR, bouton_menu, 2) 
             # Suivant / Terminer 
-            if not dessin_finished: 
-                pygame.draw.rect(fenetre, VERT, bouton_suivant) 
-                texte_btn = font.render("Suivant" if current_layer < len(layers)-1 else "Terminer", True, NOIR) 
-                fenetre.blit(texte_btn, (bouton_suivant.x+10, bouton_suivant.y+5)) 
+            if not dessin_finished:
+                pygame.draw.rect(fenetre, BLANC, bouton_suivant)  # fond blanc
+                pygame.draw.rect(fenetre, NOIR, bouton_suivant, 3)  # contour noir épais
+                texte_btn = font.render("Suivant" if current_layer < len(layers)-1 else "Terminer", True, NOIR)
+                # Centrer le texte dans le bouton
+                texte_rect = texte_btn.get_rect(center=bouton_suivant.center)
+                fenetre.blit(texte_btn, texte_rect)
             # Curseur 
             x,y = pygame.mouse.get_pos() 
             taille_curseur = rayon if y >= HAUTEUR_BANDEAU else 6 
