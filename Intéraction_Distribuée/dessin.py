@@ -122,16 +122,75 @@ def menu():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x,y = event.pos 
                 if bouton_jouer.collidepoint(x,y): 
-                    canvas.fill(BLANC) # Réinitialiser le canvas 
+                    canvas.fill(BLANC)  
                     in_menu = False 
-                    pygame.mouse.set_visible(False) 
-                    personnage_choisi = selection_dessin() 
-                    lancer_dessin_par_calques(personnage_choisi) 
+                    afficher_carte()
                 elif bouton_quitter.collidepoint(x,y): 
                     pygame.quit() 
                     exit() 
         pygame.display.flip() 
-    
+
+# --- Affichage de la carte des niveaux ---
+def afficher_carte():
+    global canvas
+
+    # Chargement de l'image de carte
+    carte = pygame.transform.scale(pygame.image.load("map.png"), (LARGEUR, HAUTEUR))
+    bouton_retour = pygame.Rect(20, 20, 120, 40)
+
+    # Positions approximatives des ronds (à ajuster ensuite)
+    niveaux = [
+        {"pos": (231, 550), "actif": True},   # Niveau 1 actif
+        {"pos": (671, 432), "actif": False},  # Exemple niveau 2 inactif
+        {"pos": (292, 314), "actif": False},  # Exemple niveau 3 inactif
+        {"pos": (739, 200), "actif": False},  # Exemple niveau 4 inactif
+        {"pos": (456, 204), "actif": False},  # Exemple niveau 5 inactif
+    ]
+
+    en_carte = True
+    pygame.mouse.set_visible(True)
+    while en_carte:
+        fenetre.blit(carte, (0, 0))
+        # --- Affiche la position de la souris ---
+        x, y = pygame.mouse.get_pos()
+        texte_pos = font.render(f"({x}, {y})", True, NOIR)
+        fenetre.blit(texte_pos, (LARGEUR - 120, 20))
+
+
+        # Bouton retour
+        pygame.draw.rect(fenetre, BLANC, bouton_retour)
+        pygame.draw.rect(fenetre, NOIR, bouton_retour, 2)
+        fenetre.blit(font.render("Retour", True, NOIR), (bouton_retour.x + 15, bouton_retour.y + 5))
+
+        # Dessin des ronds des niveaux
+        for i, niv in enumerate(niveaux):
+            couleur = (0, 255, 0) if niv["actif"] else (150, 150, 150)
+            pygame.draw.circle(fenetre, couleur, niv["pos"], 15)
+            pygame.draw.circle(fenetre, NOIR, niv["pos"], 2)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+
+                # Bouton retour
+                if bouton_retour.collidepoint(x, y):
+                    menu()
+                    return
+
+                # Détection clic sur niveau
+                for niv in niveaux:
+                    nx, ny = niv["pos"]
+                    if (x - nx) ** 2 + (y - ny) ** 2 <= 15 ** 2:  # Clic dans le cercle
+                        if niv["actif"]:
+                            personnage_choisi = selection_dessin()
+                            lancer_dessin_par_calques(personnage_choisi)
+                            return
+
 # --- Sélection du dessin --- 
 def selection_dessin(): 
     images = ["datta.png", "eby.png", "unko.png"] 
@@ -184,7 +243,7 @@ def lancer_dessin_par_calques(personnage):
 
     calques = {
         "Datta": ["datta_body.png","datta_eyes.png","datta_mouth.png","datta_noodles.png","datta_eggs.png"], 
-        "Eby": ["eby_body.png","eby_eyes.png","eby_mouth.png"], 
+        "Eby": ["eby_body.png","eby_eyes.png","eby_mouth.png","eby_tail.png"], 
         "Unko": ["unko_body.png","unko_eyes.png","unko_mouth.png"]
     } 
     layers = calques.get(personnage, []) 
