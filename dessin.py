@@ -33,6 +33,8 @@ def Elementcreated_callback(sender_agent_name, sender_agent_uuid, service_name, 
 try:
     igs.output_create("canvas_data", igs.DATA_TYPE_STRING, "Dessin actuel en base64")
     igs.input_create("canvas_data", igs.DATA_TYPE_STRING, "Dessin reçu du partenaire")
+    igs.output_create("messageOutput", igs.STRING_T, "Message texte")
+    igs.output_create("sendImpulse", igs.IMPULSION_T, "Impulsion déclenchement")
     igs.service_init("elementCreated", Elementcreated_callback, None)
     igs.service_arg_add("elementCreated", "elementId", igs.INTEGER_T)
 except Exception as e:
@@ -803,10 +805,9 @@ def lancer_dessin_par_calques(personnage):
 
         pygame.display.flip()
 
-# ---------- Dessin par calques multijoueur (la synchronisation est ici) ----------
+# ---------- Dessin par calques multijoueur ----------
 def lancer_dessin_par_calques_multijoueur(personnage, role):
     global canvas, dessin, rayon, outil, couleur_actuelle, bouton_menu, last_remote_hash, last_local_send
-    dernier_envoi = 0
     dessin_finished = False
 
     # Définition des calques
@@ -833,14 +834,19 @@ def lancer_dessin_par_calques_multijoueur(personnage, role):
     current_layer = 0
     bouton_suivant = pygame.Rect(LARGEUR - 140, HAUTEUR - 60, 120, 40)
 
+    # Charger le premier calque avec transparence
     current_guide = None
     try:
-        # Charger le premier calque avec transparence
         current_guide = pygame.image.load(layers[current_layer]).convert_alpha()
         current_guide = pygame.transform.scale(current_guide, (canvas.get_width(), canvas.get_height()))
         current_guide.set_alpha(102)
     except Exception:
         current_guide = None
+
+    # --- Zone de texte pour chat dans le bandeau ---
+    input_rect = pygame.Rect(LARGEUR - 300, 20, 200, 30)
+    chat_input = ""
+    font_input = pygame.font.SysFont("Arial", 20)
 
     running = True
     while running:
@@ -857,6 +863,17 @@ def lancer_dessin_par_calques_multijoueur(personnage, role):
                     elif event.key == pygame.K_y and redo_stack:
                         undo_stack.append(canvas.copy())
                         canvas.blit(redo_stack.pop(), (0, 0))
+                # --- Saisie dans la zone de texte ---
+                if event.key == pygame.K_RETURN:
+                    if chat_input.strip():
+                        send_chat_message(chat_input.strip())
+                        chat_input = ""
+                elif event.key == pygame.K_BACKSPACE:
+                    chat_input = chat_input[:-1]
+                else:
+                    if len(chat_input) < 50 and event.unicode.isprintable():
+                        chat_input += event.unicode
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 clique_interface = False
@@ -881,7 +898,6 @@ def lancer_dessin_par_calques_multijoueur(personnage, role):
                         menu()
                         return
                 if not dessin_finished and bouton_suivant.collidepoint(x, y):
-                    # Sauvegarde et passe au calque suivant
                     sauvegarder_et_quitter(current_layer)
                     if current_layer < len(layers) - 1:
                         current_layer += 1
@@ -892,7 +908,7 @@ def lancer_dessin_par_calques_multijoueur(personnage, role):
                         except Exception:
                             current_guide = None
                     else:
-                        dessin_finished = True  # Si c'est le dernier calque, terminé
+                        dessin_finished = True
                 if (not clique_interface and not dessin_finished and
                     y >= HAUTEUR_BANDEAU and not bouton_suivant.collidepoint(x, y)):
                     save_state()
@@ -927,6 +943,7 @@ def lancer_dessin_par_calques_multijoueur(personnage, role):
 
         pygame.draw.rect(fenetre, (180, 180, 180), (0, 0, LARGEUR, HAUTEUR_BANDEAU))
 
+        # Palette et outils
         for rect, c in palette_rects:
             pygame.draw.rect(fenetre, c, rect)
             pygame.draw.rect(fenetre, VERT if c == couleur_actuelle else NOIR, rect, 3 if c == couleur_actuelle else 2)
@@ -936,18 +953,28 @@ def lancer_dessin_par_calques_multijoueur(personnage, role):
             fenetre.blit(icones[nom], (rect.x + 5, rect.y + 5))
             pygame.draw.rect(fenetre, VERT if nom == outil else NOIR, rect, 3 if nom == outil else 2)
 
+        # Slider
         pygame.draw.rect(fenetre, (150, 150, 150), slider_rect)
         pygame.draw.rect(fenetre, (0, 0, 0), slider_handle)
         fenetre.blit(font.render(f"Taille: {rayon}", True, NOIR), (170, 55))
 
+        # Menu home
         survol_menu = bouton_menu.collidepoint(mouse_pos)
         dessiner_bouton_3d(fenetre, bouton_menu, "", police, COULEUR_HAUT, COULEUR_BAS, COULEUR_TEXTE, survol_menu)
         fenetre.blit(icone_home, (bouton_menu.x + 10, bouton_menu.y + 10))
         pygame.draw.rect(fenetre, NOIR, bouton_menu, 2)
 
+        # Bouton suivant
         if not dessin_finished:
             draw_button_and_check(fenetre, bouton_suivant, "Suivant" if current_layer < len(layers) - 1 else "Terminer", police, mouse_pos)
 
+        # --- Affichage du rectangle de texte ---
+        pygame.draw.rect(fenetre, BLANC, input_rect)
+        pygame.draw.rect(fenetre, NOIR, input_rect, 2)
+        txt_surface = font_input.render(chat_input, True, NOIR)
+        fenetre.blit(txt_surface, (input_rect.x + 5, input_rect.y + 5))
+
+        # Curseur de dessin
         x, y = pygame.mouse.get_pos()
         taille_curseur = rayon if y >= HAUTEUR_BANDEAU else 6
         if outil == "crayon":
@@ -976,6 +1003,15 @@ def sauvegarder_et_quitter(current_layer):
 
     except Exception as e:
         print("Erreur de sauvegarde du calque :", e)
+
+def send_chat_message(message):
+    try:
+        igs.output_set_string("messageOutput", message) 
+        igs.output_set_impulsion("sendImpulse")         
+        print(f"Message envoyé: {message}")
+    except Exception as e:
+        print("Erreur envoi chat:", e)
+
 
 # ---------- Lancement ----------
 if __name__ == "__main__":
