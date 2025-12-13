@@ -31,10 +31,11 @@ def Elementcreated_callback(sender_agent_name, sender_agent_uuid, service_name, 
 
 # --- Création des I/O Ingescape (compatibles avec les bindings anciens) ---
 try:
-    igs.output_create("canvas_data", igs.DATA_TYPE_STRING, "Dessin actuel en base64")
-    igs.input_create("canvas_data", igs.DATA_TYPE_STRING, "Dessin reçu du partenaire")
     igs.output_create("messageOutput", igs.STRING_T, "Message texte")
     igs.output_create("sendImpulse", igs.IMPULSION_T, "Impulsion déclenchement")
+    igs.output_create("imageUrl", igs.DATA_TYPE_STRING, "URL de l'image du canvas")
+    igs.output_create("posX", igs.DATA_TYPE_DOUBLE, "Position X")
+    igs.output_create("posY", igs.DATA_TYPE_DOUBLE, "Position Y")
     igs.service_init("elementCreated", Elementcreated_callback, None)
     igs.service_arg_add("elementCreated", "elementId", igs.INTEGER_T)
 except Exception as e:
@@ -728,6 +729,7 @@ def lancer_dessin_par_calques(personnage):
                 if not dessin_finished and bouton_suivant.collidepoint(x, y):
                     # Sauvegarde de l'état actuel du calque avant de passer au suivant
                     sauvegarder_et_quitter(current_layer)
+                    send_canvas_url()
 
                     if current_layer < len(layers) - 1:
                         current_layer += 1
@@ -899,6 +901,7 @@ def lancer_dessin_par_calques_multijoueur(personnage, role):
                         return
                 if not dessin_finished and bouton_suivant.collidepoint(x, y):
                     sauvegarder_et_quitter(current_layer)
+                    send_canvas_url()
                     if current_layer < len(layers) - 1:
                         current_layer += 1
                         try:
@@ -1012,6 +1015,25 @@ def send_chat_message(message):
     except Exception as e:
         print("Erreur envoi chat:", e)
 
+def send_canvas_url():
+    try:
+        # Sauvegarde du canvas en PNG
+        image_path = os.path.join(os.path.expanduser("~"), "DrawTogether_canvas.png")
+        pygame.image.save(canvas, image_path)
+
+        # URL locale
+        local_url = f"file:///{os.path.abspath(image_path).replace(os.sep, '/')}"
+
+        # Envoi à Ingescape
+        igs.output_set_string("imageUrl", local_url)
+        igs.output_set_double("posX", 100)
+        igs.output_set_double("posY", 0)
+        igs.output_set_impulsion("sendImpulse")         
+
+        print(f"Canvas envoyé à Ingescape : {local_url}")
+
+    except Exception as e:
+        print("Erreur lors de l'envoi du canvas :", e)
 
 # ---------- Lancement ----------
 if __name__ == "__main__":
