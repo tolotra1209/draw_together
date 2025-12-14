@@ -3,6 +3,7 @@ Draw Together - Application de Dessin Collaboratif
 
 Draw Together est une application de dessin multijoueur interactive qui permet à plusieurs utilisateurs de collaborer sur un même dessin en temps réel, avec des fonctionnalités de dessin par calques, chat intégré et synchronisation via le réseau.
 ✨ Fonctionnalités
+
 🎨 Fonctionnalités de dessin
 
     Outils de dessin :
