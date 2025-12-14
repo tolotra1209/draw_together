@@ -76,8 +76,8 @@ Installation des dépendances
 
 bash
 
-$ pip install pygame
-$ pip install ingescape
+    $ pip install pygame
+    $ pip install ingescape
 
 Structure des fichiers
 text
@@ -114,7 +114,7 @@ Lancement de l'application, de circle avec le system (DrawTogether.igssystem) et
 
 bash
 
-$ python main_joueur_1.py (resp. 2 pour le joueur 2)
+    $ python main_joueur_1.py (resp. 2 pour le joueur 2)
 
 Navigation
 
@@ -227,7 +227,7 @@ Problèmes courants
 
 bash
 
-$ pip install ingescape
+    $ pip install ingescape
 
 Fichiers manquants :
 
@@ -247,7 +247,7 @@ Erreurs d'import :
 
 bash
 
-$ pip install pygame --upgrade
+    $ pip install pygame --upgrade
 
 Logs
 
