@@ -73,6 +73,7 @@ Prérequis
     Ingescape
 
 Installation des dépendances
+
 bash
 
 $ pip install pygame
