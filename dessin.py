@@ -17,11 +17,11 @@ igs.set_command_line(sys.executable + " " + " ".join(sys.argv))
 
 # --- Sécurité : définir les constantes si elles n'existent pas ---
 if not hasattr(igs, "DATA_TYPE_STRING"):
-    igs.DATA_TYPE_BOOL = 0
-    igs.DATA_TYPE_INT = 1
-    igs.DATA_TYPE_DOUBLE = 2
-    igs.DATA_TYPE_STRING = 3
-    igs.DATA_TYPE_DATA = 4
+    igs.TYPE_BOOL = 0
+    igs.TYPE_INT = 1
+    igs.TYPE_DOUBLE = 2
+    igs.TYPE_STRING = 3
+    igs.TYPE_DATA = 4
 
 elementId = -1
 
@@ -32,10 +32,11 @@ def Elementcreated_callback(sender_agent_name, sender_agent_uuid, service_name, 
 # --- Création des I/O Ingescape (compatibles avec les bindings anciens) ---
 try:
     igs.output_create("messageOutput", igs.STRING_T, "Message texte")
-    igs.output_create("sendImpulse", igs.IMPULSION_T, "Impulsion déclenchement")
-    igs.output_create("imageUrl", igs.DATA_TYPE_STRING, "URL de l'image du canvas")
-    igs.output_create("posX", igs.DATA_TYPE_DOUBLE, "Position X")
-    igs.output_create("posY", igs.DATA_TYPE_DOUBLE, "Position Y")
+    igs.output_create("sendImpulse_chat", igs.IMPULSION_T, "Impulsion déclenchement")
+    igs.output_create("sendImpulse_calque", igs.IMPULSION_T, "Impulsion déclenchement")
+    igs.output_create("imageUrl", igs.TYPE_STRING, "URL de l'image du canvas")
+    igs.output_create("posX", igs.TYPE_DOUBLE, "Position X")
+    igs.output_create("posY", igs.TYPE_DOUBLE, "Position Y")
     igs.service_init("elementCreated", Elementcreated_callback, None)
     igs.service_arg_add("elementCreated", "elementId", igs.INTEGER_T)
 except Exception as e:
@@ -1010,7 +1011,7 @@ def sauvegarder_et_quitter(current_layer):
 def send_chat_message(message):
     try:
         igs.output_set_string("messageOutput", message) 
-        igs.output_set_impulsion("sendImpulse")         
+        igs.output_set_impulsion("sendImpulse_chat")         
         print(f"Message envoyé: {message}")
     except Exception as e:
         print("Erreur envoi chat:", e)
@@ -1028,7 +1029,7 @@ def send_canvas_url():
         igs.output_set_string("imageUrl", local_url)
         igs.output_set_double("posX", 100)
         igs.output_set_double("posY", 0)
-        igs.output_set_impulsion("sendImpulse")         
+        igs.output_set_impulsion("sendImpulse_calque")         
 
         print(f"Canvas envoyé à Ingescape : {local_url}")
 
