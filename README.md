@@ -276,6 +276,7 @@ Points d'extension
 📄 Licence
 
 Application éducative - Libre d'utilisation et modification
+
 👥 Crédits
 
     Développé avec Pygame et Ingescape pat BASTIDE Guillaume et RANDRIAMAROVELO Tolotra
@@ -296,5 +297,5 @@ Les contributions sont les bienvenues :
 
     Push et Pull Request
 
-Version : 1.16
+Version : 1.2.3
 Dernière mise à jour : décembre 2025
