@@ -43,7 +43,7 @@ Draw Together est une application de dessin multijoueur interactive qui permet �
 
     Interface 3D : Boutons avec effets visuels
 
-    Système de progression : Carte des niveaux (seulement le premier niveau à été développé)
+    Système de progression : Carte des niveaux (seulement le premier niveau a été développé)
 
     Écrans de transition animés
 
