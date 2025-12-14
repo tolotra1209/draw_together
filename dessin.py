@@ -15,7 +15,7 @@ igs.log_set_file(True, None)
 igs.log_set_stream(True)
 igs.set_command_line(sys.executable + " " + " ".join(sys.argv))
 
-# --- Sécurité : définir les constantes si elles n'existent pas ---
+# --- Sécurité ---
 if not hasattr(igs, "DATA_TYPE_STRING"):
     igs.TYPE_BOOL = 0
     igs.TYPE_INT = 1
@@ -29,7 +29,7 @@ def Elementcreated_callback(sender_agent_name, sender_agent_uuid, service_name, 
     global elementId 
     elementId = tuple_args[0]
 
-# --- Création des I/O Ingescape (compatibles avec les bindings anciens) ---
+# --- Création des I/O Ingescape ---
 try:
     igs.output_create("messageOutput", igs.STRING_T, "Message texte")
     igs.output_create("sendImpulse_chat", igs.IMPULSION_T, "Impulsion déclenchement")
@@ -42,7 +42,7 @@ try:
 except Exception as e:
     print("Attention : output/input creation error (non critique si déjà créé):", e)
 
-# Démarrage Ingescape (généralement ok avant communication)
+# Démarrage Ingescape
 try:
     igs.start_with_device("Wi-Fi", 5670)
 except Exception as e:
@@ -1045,3 +1045,4 @@ if __name__ == "__main__":
     except Exception as e:
         print("Erreur non gérée :", e)
         sauvegarder_et_quitter()
+
