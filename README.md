@@ -223,7 +223,8 @@ COULEURS_BASE = [
 Problèmes courants
 
     Ingescape non installé :
-    bash
+
+bash
 
 $ pip install ingescape
 
