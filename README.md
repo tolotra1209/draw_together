@@ -279,7 +279,7 @@ Application éducative - Libre d'utilisation et modification
 
 👥 Crédits
 
-    Développé avec Pygame et Ingescape pat BASTIDE Guillaume et RANDRIAMAROVELO Tolotra
+    Développé avec Pygame et Ingescape par BASTIDE Guillaume et RANDRIAMAROVELO Tolotra
 
     Graphismes originaux
 
