@@ -31,9 +31,9 @@ Draw Together est une application de dessin multijoueur interactive qui permet �
 
     Synchronisation automatique des dessins (non implémenté, chaque joueur voit son calque sur le whiteboard mais pas celui de son partenaire)
 
-    <img width="1346" height="784" alt="image" src="https://github.com/user-attachments/assets/8f6f410d-7862-4009-a410-5512c2227faa" />
+<img width="1346" height="784" alt="image" src="https://github.com/user-attachments/assets/8f6f410d-7862-4009-a410-5512c2227faa" />
 
-    <img width="1619" height="935" alt="image" src="https://github.com/user-attachments/assets/ee7cac7d-f232-4398-935e-089b9b0a783b" />
+<img width="1619" height="935" alt="image" src="https://github.com/user-attachments/assets/ee7cac7d-f232-4398-935e-089b9b0a783b" />
 
 🎮 Expérience utilisateur
 
